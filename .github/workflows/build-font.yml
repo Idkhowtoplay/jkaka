@@ -1,0 +1,41 @@
+name: Build Iosevka Custom
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Clone Iosevka
+        run: git clone --depth=1 https://github.com/be5invis/Iosevka.git iosevka
+
+      - name: Move build plan
+        run: cp private-build-plans.toml iosevka/private-build-plans.toml
+
+      - name: Install dependencies
+        run: |
+          cd iosevka
+          npm install
+
+      - name: Build custom font
+        run: |
+          cd iosevka
+          npm run build -- contents::IosevkaCustom
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iosevka-custom
+          path: iosevka/dist/IosevkaCustom
